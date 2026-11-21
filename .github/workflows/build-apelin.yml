@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo '51ff74603e962ae46fbc3d3db13e2cdf012a8a919fb0c895b82c6f02915ca393  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
+          echo '2ed2e053b0aaf3bf97af447f0473c22e47d158d815397f17f7984ffede6d1846  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
           mkdir source
           tar -xzf Apelin-fixed-source.tar.gz -C source
           python3 - <<'PY'
