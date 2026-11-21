@@ -66,3 +66,8 @@ patch_source('Packages/ApelinAgent/Tests/ApelinAgentTests/CompactionTests.swift'
     'var refused = fauxAssistantMessage(blocks: [], stopReason: .error, errorMessage: "maximum context length exceeded")\n        refused.failure = ProviderFailure(message: "maximum context length exceeded", httpStatus: 400)\n        faux.setResponses([\n',
     '// Emulate the terminal SDK error after its own compaction has failed.\n        // A raw provider overflow would first consume another faux reply as a recap.\n        let refused = fauxAssistantMessage(blocks: [], stopReason: .error, errorMessage:\n            "context is too large and compaction failed: compaction left 120801 tokens, above the recovery target of 78643")\n        faux.setResponses([\n')
 print('Updated window-event assertions, awaited credential persistence, and isolated terminal SDK overflow recovery.')
+
+patch_source('Apelin/Interface/Settings/Accounts/ProviderBalanceScreen.swift',
+    r'return "\(formatter.string(from: NSNumber(value: amount)) ?? \"\(amount)\") quota"',
+    'let number = formatter.string(from: NSNumber(value: amount)) ?? String(amount)\n            return "\\(number) quota"')
+print('Fixed quota amount interpolation syntax.')
