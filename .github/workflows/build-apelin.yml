@@ -61,7 +61,7 @@ jobs:
           files = sorted(root.rglob('*.swift'))
           compiler = subprocess.check_output(['xcrun', '--find', 'swiftc'], text=True).strip()
           def parse(path):
-              result = subprocess.run([compiler, '-frontend', '-parse', str(path)], capture_output=True, text=True)
+              result = subprocess.run([compiler, '-frontend', '-parse', '-enable-bare-slash-regex', str(path)], capture_output=True, text=True)
               return path, result
           failures = 0
           with ThreadPoolExecutor(max_workers=6) as pool:
