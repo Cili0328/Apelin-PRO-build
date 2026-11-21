@@ -39,3 +39,35 @@ text = verification.read_text()
 assert text.count('try await makeServer(') == 4
 verification.write_text(text.replace('try await makeServer(', 'try await Self.makeServer('))
 print('Qualified four static verification server calls.')
+
+source_root = Path('source/Apelin-fixed')
+def patch_source(relative, before, after):
+    path = source_root / relative
+    content = path.read_text()
+    assert content.count(before) == 1, (relative, before)
+    path.write_text(content.replace(before, after))
+
+patch_source('Packages/ApelinAgent/Tests/ApelinAgentTests/LongLogTests.swift',
+    '#expect(seq == UInt64(lines) + 1, "the abandoned approval is closed")',
+    '#expect(seq == UInt64(lines) + 2, "the abandoned approval is closed and the model window is recorded")')
+patch_source('Packages/ApelinAgent/Tests/ApelinAgentTests/LongLogTests.swift',
+    '#expect(await reopened.log.lastSeq == seq + 1)',
+    '#expect(await reopened.log.lastSeq == seq + 2)')
+patch_source('Packages/ApelinAgent/Tests/ApelinAgentTests/ScriptedSessionTests.swift',
+    '#expect(events.first == .promptSubmitted(text: "Turn the hook on, build, install and check it loaded."))',
+    '#expect(events.first == .contextWindow(128_000))\n        #expect(events.dropFirst().first == .promptSubmitted(text: "Turn the hook on, build, install and check it loaded."))')
+patch_source('Packages/ApelinAgent/Tests/ApelinAgentWorkerTests/AccountDeskTests.swift',
+    'try await response.value\n        #expect(try await store.credentials(for: CredentialProviderID.openAICompatible) == candidate)',
+    'try await response.value\n        try await recorder.waitFor { $0.state != nil }\n        #expect(recorder.state == .succeeded)\n        #expect(try await store.credentials(for: CredentialProviderID.openAICompatible) == candidate)')
+patch_source('Packages/ApelinAgent/Tests/ApelinAgentTests/CompactionTests.swift',
+    'func `overflow retries from existing user turn without duplicating prompt`() async throws {',
+    'func `SDK compaction failure retries from existing user turn without duplicating prompt`() async throws {')
+patch_source('Packages/ApelinAgent/Tests/ApelinAgentTests/CompactionTests.swift',
+    'var refused = fauxAssistantMessage(blocks: [], stopReason: .error, errorMessage: "maximum context length exceeded")\n        refused.failure = ProviderFailure(message: "maximum context length exceeded", httpStatus: 400)\n        faux.setResponses([\n',
+    '// Emulate the terminal SDK error after its own compaction has failed.\n        // A raw provider overflow would first consume another faux reply as a recap.\n        let refused = fauxAssistantMessage(blocks: [], stopReason: .error, errorMessage:\n            "context is too large and compaction failed: compaction left 120801 tokens, above the recovery target of 78643")\n        faux.setResponses([\n')
+print('Updated window-event assertions, awaited credential persistence, and isolated terminal SDK overflow recovery.')
+
+patch_source('Apelin/Interface/Settings/Accounts/ProviderBalanceScreen.swift',
+    r'return "\(formatter.string(from: NSNumber(value: amount)) ?? \"\(amount)\") quota"',
+    'let number = formatter.string(from: NSNumber(value: amount)) ?? String(amount)\n            return "\\(number) quota"')
+print('Fixed quota amount interpolation syntax.')

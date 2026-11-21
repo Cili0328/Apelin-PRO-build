@@ -49,12 +49,37 @@ jobs:
                   p.chmod(p.stat().st_mode | 0o111)
           PY
           python3 ci-source-fixes.py
+      - name: Parse Swift sources before dependency builds
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' 2>&1 | tee syntax.log
+          from pathlib import Path
+          from concurrent.futures import ThreadPoolExecutor
+          import subprocess
+          root = Path('source/Apelin-fixed')
+          files = sorted(root.rglob('*.swift'))
+          compiler = subprocess.check_output(['xcrun', '--find', 'swiftc'], text=True).strip()
+          def parse(path):
+              result = subprocess.run([compiler, '-frontend', '-parse', str(path)], capture_output=True, text=True)
+              return path, result
+          failures = 0
+          with ThreadPoolExecutor(max_workers=6) as pool:
+              for path, result in pool.map(parse, files):
+                  if result.returncode:
+                      failures += 1
+                      print(str(path))
+                      print(result.stdout + result.stderr)
+          print(f'Swift syntax: {len(files)} files, {failures} failures')
+          raise SystemExit(bool(failures))
+          PY
       - name: Restore Swift package build cache
         uses: actions/cache/restore@v4
         with:
           path: |
             source/Apelin-fixed/Packages/*/.build
             ~/Library/Caches/org.swift.swiftpm
+            /private/tmp/apelin-deriveddata
           key: swift-xcode26.5-${{ github.run_id }}
           restore-keys: swift-xcode26.5-
       - name: Install packaging tools
@@ -80,6 +105,7 @@ jobs:
           path: |
             source/Apelin-fixed/Packages/*/.build
             ~/Library/Caches/org.swift.swiftpm
+            /private/tmp/apelin-deriveddata
           key: swift-xcode26.5-${{ github.run_id }}
       - name: Upload diagnostics
         if: always()
