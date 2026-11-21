@@ -91,3 +91,22 @@ patch_source('Apelin/Interface/Settings/Accounts/ProviderBalance.swift',
     'switch balanceError {\n            case .unsupported:\n                true\n            case let .httpStatus(status):\n                status == 404 || status == 405\n            default:\n                false\n            }',
     'switch balanceError {\n            case .unsupported:\n                return true\n            case let .httpStatus(status):\n                return status == 404 || status == 405\n            default:\n                return false\n            }')
 print('Fixed explicit Bool returns in balance route classification.')
+
+key = 'This chat cannot be compacted while it is working.'
+translations = {
+'en': key, 'zh-Hans': '此会话正在运行，请等待结束后再压缩。',
+'zh-Hant': '此對話正在執行，請等待結束後再壓縮。',
+'ar': 'لا يمكن ضغط هذه المحادثة أثناء عملها.',
+'de': 'Dieser Chat kann während der Verarbeitung nicht komprimiert werden.',
+'es': 'Este chat no se puede compactar mientras está trabajando.',
+'fr': 'Cette conversation ne peut pas être condensée pendant son exécution.',
+'it': 'Questa chat non può essere compattata mentre è in esecuzione.',
+'ja': 'このチャットの実行中はコンテキストを圧縮できません。',
+'ko': '이 채팅이 실행 중일 때는 압축할 수 없습니다.',
+'pt-BR': 'Este chat não pode ser compactado enquanto está em execução.',
+'ru': 'Этот чат нельзя сжать во время его работы.',
+'vi': 'Không thể nén cuộc trò chuyện này khi đang xử lý.'}
+catalog = json.loads(p.read_text())
+catalog['strings'][key] = {'localizations': {locale: {'stringUnit': {'state': 'translated', 'value': value}} for locale, value in translations.items()}}
+p.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + '\n')
+print('Added missing busy-chat compaction text in every supported language.')
