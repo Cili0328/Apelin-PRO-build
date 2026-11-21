@@ -77,3 +77,12 @@ text = makefile.read_text()
 assert text.count('swift test --package-path') == 2
 makefile.write_text(text.replace('swift test --package-path', 'swift test --no-parallel --package-path'))
 print('Run regression tests serially on hosted runners; timeout assertions stay unchanged.')
+
+patch_source('Apelin/Interface/Settings/Accounts/ProviderMeta.swift',
+    'import Foundation\n', 'import ApelinProtocol\nimport Foundation\n')
+patch_source('Apelin/Interface/Settings/Accounts/ProviderLoginController.swift',
+    '.stringValue.flatMap(TaskState.init(rawValue))',
+    '.stringValue.flatMap({ TaskState(rawValue: $0) })')
+patch_source('Apelin/Interface/Settings/Accounts/ProviderLoginController.swift',
+    'verifyModel: !isEditingConfiguration,', 'verifyModel: !self.isEditingConfiguration,')
+print('Fixed provider settings import, TaskState initializer and explicit closure capture.')
