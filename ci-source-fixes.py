@@ -71,3 +71,9 @@ patch_source('Apelin/Interface/Settings/Accounts/ProviderBalanceScreen.swift',
     r'return "\(formatter.string(from: NSNumber(value: amount)) ?? \"\(amount)\") quota"',
     'let number = formatter.string(from: NSNumber(value: amount)) ?? String(amount)\n            return "\\(number) quota"')
 print('Fixed quota amount interpolation syntax.')
+
+makefile = source_root / 'Makefile'
+text = makefile.read_text()
+assert text.count('swift test --package-path') == 2
+makefile.write_text(text.replace('swift test --package-path', 'swift test --no-parallel --package-path'))
+print('Run regression tests serially on hosted runners; timeout assertions stay unchanged.')
