@@ -79,7 +79,7 @@ jobs:
             source/Apelin-fixed/Packages/*/.build
             ~/Library/Caches/org.swift.swiftpm
             /private/tmp/apelin-deriveddata
-          key: swift-xcode26.5-${{ github.run_id }}
+          key: swift-xcode26.5-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: swift-xcode26.5-
       - name: Install packaging tools
         run: brew install dpkg ldid zstd
@@ -90,6 +90,7 @@ jobs:
           cd source/Apelin-fixed
           make check 2>&1 | tee "$GITHUB_WORKSPACE/check.log"
       - name: Run Swift regression harness
+        timeout-minutes: 45
         shell: bash
         run: |
           set -euo pipefail
@@ -111,12 +112,13 @@ jobs:
             source/Apelin-fixed/Packages/*/.build
             ~/Library/Caches/org.swift.swiftpm
             /private/tmp/apelin-deriveddata
-          key: swift-xcode26.5-${{ github.run_id }}
+          key: swift-xcode26.5-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-logs-${{ github.run_number }}
+          overwrite: true
           path: '*.log'
           if-no-files-found: ignore
       - name: Upload built packages
