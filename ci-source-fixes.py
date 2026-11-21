@@ -86,3 +86,8 @@ patch_source('Apelin/Interface/Settings/Accounts/ProviderLoginController.swift',
 patch_source('Apelin/Interface/Settings/Accounts/ProviderLoginController.swift',
     'verifyModel: !isEditingConfiguration,', 'verifyModel: !self.isEditingConfiguration,')
 print('Fixed provider settings import, TaskState initializer and explicit closure capture.')
+
+patch_source('Apelin/Interface/Settings/Accounts/ProviderBalance.swift',
+    'switch balanceError {\n            case .unsupported:\n                true\n            case let .httpStatus(status):\n                status == 404 || status == 405\n            default:\n                false\n            }',
+    'switch balanceError {\n            case .unsupported:\n                return true\n            case let .httpStatus(status):\n                return status == 404 || status == 405\n            default:\n                return false\n            }')
+print('Fixed explicit Bool returns in balance route classification.')
