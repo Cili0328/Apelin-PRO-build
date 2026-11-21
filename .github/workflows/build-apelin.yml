@@ -30,6 +30,19 @@ jobs:
           echo '11c5fef259fab375419ae9e88ef39637d308d5738079a5ca8d161c1e24929bce  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
           mkdir source
           tar -xzf Apelin-fixed-source.tar.gz -C source
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path('source/Apelin-fixed')
+          for p in root.rglob('*'):
+              if not p.is_file():
+                  continue
+              if p.suffix in {'.sh', '.py', '.swift', '.c', '.h', '.m', '.mm', '.json', '.md', '.plist', '.xcconfig', '.pbxproj', '.yml', '.yaml'} or p.name == 'Makefile':
+                  data = p.read_bytes()
+                  if b'\r\n' in data:
+                      p.write_bytes(data.replace(b'\r\n', b'\n'))
+              if p.suffix in {'.sh', '.py'}:
+                  p.chmod(p.stat().st_mode | 0o111)
+          PY
       - name: Install packaging tools
         run: brew install dpkg ldid zstd
       - name: Check, test and build both package flavors
