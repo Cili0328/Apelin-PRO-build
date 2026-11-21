@@ -1,0 +1,59 @@
+name: Build Apelin packages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Select required Xcode and report installed SDKs
+        shell: bash
+        run: |
+          set -euo pipefail
+          ls -d /Applications/Xcode*.app
+          selected=''
+          for app in /Applications/Xcode*.app; do
+            version="$(DEVELOPER_DIR="$app/Contents/Developer" xcrun --sdk iphoneos --show-sdk-version 2>/dev/null || true)"
+            echo "$app iPhoneOS SDK: $version"
+            if [[ "$version" == 27.1* ]]; then selected="$app/Contents/Developer"; break; fi
+          done
+          if [[ -z "$selected" ]]; then
+            echo '::error::This source requires iPhoneOS SDK 27.1. No installed Xcode supplies it.'
+            exit 69
+          fi
+          echo "DEVELOPER_DIR=$selected" >> "$GITHUB_ENV"
+      - name: Verify and extract reviewed source
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '11c5fef259fab375419ae9e88ef39637d308d5738079a5ca8d161c1e24929bce  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
+          mkdir source
+          tar -xzf Apelin-fixed-source.tar.gz -C source
+      - name: Install packaging tools
+        run: brew install dpkg ldid zstd
+      - name: Check, test and build both package flavors
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source/Apelin-fixed
+          make check
+          make harness
+          make deb-all CONFIGURATION=Release SKIP_HARNESS=1 BUILD_NUMBER="$GITHUB_RUN_NUMBER"
+          cd build/Packages
+          shasum -a 256 ./*.deb > SHA256SUMS-deb
+      - name: Upload built packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: apelin-debs-${{ github.run_number }}
+          path: |
+            source/Apelin-fixed/build/Packages/*.deb
+            source/Apelin-fixed/build/Packages/SHA256SUMS-deb
+          if-no-files-found: error
+          retention-days: 30
