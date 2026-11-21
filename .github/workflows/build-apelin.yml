@@ -49,6 +49,14 @@ jobs:
                   p.chmod(p.stat().st_mode | 0o111)
           PY
           python3 ci-source-fixes.py
+      - name: Restore Swift package build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            source/Apelin-fixed/Packages/*/.build
+            ~/Library/Caches/org.swift.swiftpm
+          key: swift-xcode26.5-${{ github.run_id }}
+          restore-keys: swift-xcode26.5-
       - name: Install packaging tools
         run: brew install dpkg ldid zstd
       - name: Check project invariants
@@ -71,6 +79,14 @@ jobs:
           make deb-all IOS_SDK_TIER="$BUILD_SDK_TIER" CONFIGURATION=Release SKIP_HARNESS=1 BUILD_NUMBER="$GITHUB_RUN_NUMBER" 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
           cd build/Packages
           shasum -a 256 ./*.deb > SHA256SUMS-deb
+      - name: Save Swift package build cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            source/Apelin-fixed/Packages/*/.build
+            ~/Library/Caches/org.swift.swiftpm
+          key: swift-xcode26.5-${{ github.run_id }}
       - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@v4

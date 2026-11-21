@@ -33,3 +33,9 @@ assert text.count(anchor) == 1
 text = text.replace(anchor, auto + anchor)
 session.write_text(text)
 print('Ordered betweenTurns before autoCompact to match pinned AgentOptions initializer.')
+
+verification = Path('source/Apelin-fixed/Packages/ApelinAgent/Tests/ApelinAgentWorkerTests/ProviderKeyVerificationTests.swift')
+text = verification.read_text()
+assert text.count('try await makeServer(') == 4
+verification.write_text(text.replace('try await makeServer(', 'try await Self.makeServer('))
+print('Qualified four static verification server calls.')
