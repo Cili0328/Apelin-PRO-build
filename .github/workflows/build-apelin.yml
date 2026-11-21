@@ -13,22 +13,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Select required Xcode and report installed SDKs
+      - name: Select hosted Xcode 26.5 for compatibility build
         shell: bash
         run: |
           set -euo pipefail
-          ls -d /Applications/Xcode*.app
-          selected=''
-          for app in /Applications/Xcode*.app; do
-            version="$(DEVELOPER_DIR="$app/Contents/Developer" xcrun --sdk iphoneos --show-sdk-version 2>/dev/null || true)"
-            echo "$app iPhoneOS SDK: $version"
-            if [[ "$version" == 27.1* ]]; then selected="$app/Contents/Developer"; break; fi
-          done
-          if [[ -z "$selected" ]]; then
-            echo '::error::This source requires iPhoneOS SDK 27.1. No installed Xcode supplies it.'
-            exit 69
-          fi
-          echo "DEVELOPER_DIR=$selected" >> "$GITHUB_ENV"
+          export DEVELOPER_DIR=/Applications/Xcode_26.5.app/Contents/Developer
+          xcodebuild -version
+          sdk="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
+          echo "BUILD_SDK_TIER=$sdk" >> "$GITHUB_ENV"
+          echo "Compatibility build uses SDK $sdk; upstream SDK tier is 27.1."
       - name: Verify and extract reviewed source
         shell: bash
         run: |
@@ -43,11 +37,18 @@ jobs:
         run: |
           set -euo pipefail
           cd source/Apelin-fixed
-          make check
-          make harness
-          make deb-all CONFIGURATION=Release SKIP_HARNESS=1 BUILD_NUMBER="$GITHUB_RUN_NUMBER"
+          make check 2>&1 | tee "$GITHUB_WORKSPACE/check.log"
+          make harness 2>&1 | tee "$GITHUB_WORKSPACE/harness.log"
+          make deb-all IOS_SDK_TIER="$BUILD_SDK_TIER" CONFIGURATION=Release SKIP_HARNESS=1 BUILD_NUMBER="$GITHUB_RUN_NUMBER" 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
           cd build/Packages
           shasum -a 256 ./*.deb > SHA256SUMS-deb
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ github.run_number }}
+          path: '*.log'
+          if-no-files-found: ignore
       - name: Upload built packages
         uses: actions/upload-artifact@v4
         with:
