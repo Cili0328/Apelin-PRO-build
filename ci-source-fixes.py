@@ -22,3 +22,14 @@ for locale, translations in values.items():
         catalog['strings'][key]['localizations'][locale]={'stringUnit':{'state':'translated','value':value}}
 p.write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n')
 print('Added 110 missing localized values.')
+
+session = Path('source/Apelin-fixed/Packages/ApelinAgent/Sources/ApelinAgent/Session/AgentSession.swift')
+text = session.read_text()
+auto = '            autoCompact: Self.automaticCompactionOptions(for: resolved.model, journal: journal),\n'
+assert text.count(auto) == 1
+text = text.replace(auto, '')
+anchor = '            authResolver: resolved.authResolver,\n'
+assert text.count(anchor) == 1
+text = text.replace(anchor, auto + anchor)
+session.write_text(text)
+print('Ordered betweenTurns before autoCompact to match pinned AgentOptions initializer.')

@@ -51,13 +51,23 @@ jobs:
           python3 ci-source-fixes.py
       - name: Install packaging tools
         run: brew install dpkg ldid zstd
-      - name: Check, test and build both package flavors
+      - name: Check project invariants
         shell: bash
         run: |
           set -euo pipefail
           cd source/Apelin-fixed
           make check 2>&1 | tee "$GITHUB_WORKSPACE/check.log"
+      - name: Run Swift regression harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source/Apelin-fixed
           make harness 2>&1 | tee "$GITHUB_WORKSPACE/harness.log"
+      - name: Build both Debian package flavors
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source/Apelin-fixed
           make deb-all IOS_SDK_TIER="$BUILD_SDK_TIER" CONFIGURATION=Release SKIP_HARNESS=1 BUILD_NUMBER="$GITHUB_RUN_NUMBER" 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
           cd build/Packages
           shasum -a 256 ./*.deb > SHA256SUMS-deb
