@@ -36,11 +36,12 @@ jobs:
           for p in root.rglob('*'):
               if not p.is_file():
                   continue
-              if p.suffix in {'.sh', '.py', '.swift', '.c', '.h', '.m', '.mm', '.json', '.md', '.plist', '.xcconfig', '.pbxproj', '.yml', '.yaml'} or p.name == 'Makefile':
-                  data = p.read_bytes()
+              data = p.read_bytes()
+              script = data.startswith(b'#!')
+              if script or p.suffix in {'.sh', '.py', '.swift', '.c', '.h', '.m', '.mm', '.json', '.md', '.plist', '.xcconfig', '.pbxproj', '.yml', '.yaml'} or p.name == 'Makefile':
                   if b'\r\n' in data:
                       p.write_bytes(data.replace(b'\r\n', b'\n'))
-              if p.suffix in {'.sh', '.py'}:
+              if script or p.suffix in {'.sh', '.py'}:
                   p.chmod(p.stat().st_mode | 0o111)
           PY
       - name: Install packaging tools
