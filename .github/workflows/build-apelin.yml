@@ -48,6 +48,7 @@ jobs:
               if script or p.suffix in {'.sh', '.py'}:
                   p.chmod(p.stat().st_mode | 0o111)
           PY
+          python3 ci-source-fixes.py
       - name: Install packaging tools
         run: brew install dpkg ldid zstd
       - name: Check, test and build both package flavors
