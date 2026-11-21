@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo '11c5fef259fab375419ae9e88ef39637d308d5738079a5ca8d161c1e24929bce  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
+          echo '911b0c4f74e40f7e1f6d8729004853335b43b2e327b94626e7e3a4b5b3a9f186  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
           mkdir source
           tar -xzf Apelin-fixed-source.tar.gz -C source
           python3 - <<'PY'
@@ -48,7 +48,6 @@ jobs:
               if script or p.suffix in {'.sh', '.py'}:
                   p.chmod(p.stat().st_mode | 0o111)
           PY
-          python3 ci-source-fixes.py
       - name: Parse Swift sources before dependency builds
         shell: bash
         run: |
