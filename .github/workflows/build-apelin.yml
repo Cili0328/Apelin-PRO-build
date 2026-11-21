@@ -38,8 +38,12 @@ jobs:
                   continue
               data = p.read_bytes()
               script = data.startswith(b'#!')
-              if script or p.suffix in {'.sh', '.py', '.swift', '.c', '.h', '.m', '.mm', '.json', '.md', '.plist', '.xcconfig', '.pbxproj', '.yml', '.yaml'} or p.name == 'Makefile':
-                  if b'\r\n' in data:
+              if b'\r\n' in data and b'\x00' not in data:
+                  try:
+                      data.decode('utf-8')
+                  except UnicodeDecodeError:
+                      pass
+                  else:
                       p.write_bytes(data.replace(b'\r\n', b'\n'))
               if script or p.suffix in {'.sh', '.py'}:
                   p.chmod(p.stat().st_mode | 0o111)
