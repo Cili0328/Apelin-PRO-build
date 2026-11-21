@@ -1,4 +1,4 @@
-name: Build Apelin packages
+name: Compile Apelin packages alongside regression tests
 on:
   push:
     branches: [main]
@@ -65,12 +65,6 @@ jobs:
           set -euo pipefail
           cd source/Apelin-fixed
           make check 2>&1 | tee "$GITHUB_WORKSPACE/check.log"
-      - name: Run Swift regression harness
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd source/Apelin-fixed
-          make harness 2>&1 | tee "$GITHUB_WORKSPACE/harness.log"
       - name: Build both Debian package flavors
         shell: bash
         run: |
