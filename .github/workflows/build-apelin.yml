@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo 'cefe7dca5f1f46bd7c8b6ef21390d77c45678fa5296f5b98fd9b93ade3bd04c7  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
+          echo '39150e82605bd3a9a824be7db15ad354b1eae034bcfdf3d059d5dcc3cea512ad  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
           mkdir source
           tar -xzf Apelin-fixed-source.tar.gz -C source
           python3 - <<'PY'
@@ -115,7 +115,9 @@ jobs:
             Packages/ApelinAgent/Tests/ApelinAgentWorkerTests/RelayAccountDeskTests.swift \
             Packages/ApelinKit/Sources/ApelinProtocol/Operations/Agent.swift \
             Packages/ApelinKit/Sources/ApelinProtocol/Operations/AgentRelay.swift \
-            Packages/ApelinKit/Sources/ApelinProtocol/Operations/AgentSignIn.swift 2>&1 | tee "$GITHUB_WORKSPACE/format.log"
+            Packages/ApelinKit/Sources/ApelinProtocol/Operations/AgentSignIn.swift \
+            Tests/ChatTranscript/RelaySelectionCheck.swift \
+            Tests/ChatTranscript/main.swift 2>&1 | tee "$GITHUB_WORKSPACE/format.log"
       - name: Check project invariants
         shell: bash
         run: |
