@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo '70bf7aaddda3d57059c633de85f3108f784e6be4544c3459189b4941385534fc  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
+          echo '7338dde1dae81b10400cb584d8967a79dd23e02ca258110e65f7e45ebdbbb1d7  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
           mkdir source
           tar -xzf Apelin-fixed-source.tar.gz -C source
           python3 - <<'PY'
@@ -89,18 +89,32 @@ jobs:
           set -euo pipefail
           cd source/Apelin-fixed
           swiftformat Apelin/Interface/Chats/ChatController.swift \
-            Apelin/Interface/Chats/ChatGlassView.swift \
-            Apelin/Interface/Chats/ChatModelHeader.swift \
             Apelin/Interface/Chats/ChatModelPickerController.swift \
-            Apelin/Interface/Chats/ChatTopBlurView.swift \
-            Apelin/Interface/Chats/Composer/ComposerView.swift \
-            Apelin/Interface/Chats/Composer/Sections/ComposerModelBar.swift \
-            Apelin/Interface/Chats/Messages/ChatMessage.swift \
-            Apelin/Interface/Chats/Messages/ChatActivityRow.swift \
-            Apelin/Interface/Chats/Messages/ThinkingStatusLabel.swift \
-            Apelin/Interface/Chats/Messages/ChatMessageRow.swift \
-            Apelin/Interface/Chats/Messages/ToolCallBanner.swift \
-            Tests/ChatTranscript/main.swift 2>&1 | tee "$GITHUB_WORKSPACE/format.log"
+            Apelin/Interface/Chats/ChatRuntime.swift \
+            Apelin/Interface/Chats/Composer/ComposerModelSelection.swift \
+            Apelin/Interface/Settings/Accounts/AgentProvider+Display.swift \
+            Apelin/Interface/Settings/Accounts/EnabledModels.swift \
+            Apelin/Interface/Settings/Accounts/ProviderBalanceHistory.swift \
+            Apelin/Interface/Settings/Accounts/ProviderBalanceScreen.swift \
+            Apelin/Interface/Settings/Accounts/ProviderKeyFormController.swift \
+            Apelin/Interface/Settings/Accounts/ProviderLoginController.swift \
+            Apelin/Interface/Settings/Accounts/RelayConfigurationController.swift \
+            Apelind/Session/Agent/AgentConversationRules.swift \
+            Packages/ApelinAgent/Sources/ApelinAgent/Credentials/RelayCredentialPool.swift \
+            Packages/ApelinAgent/Sources/ApelinAgent/Session/AgentSession.swift \
+            Packages/ApelinAgent/Sources/ApelinAgent/Session/NetworkRecovery.swift \
+            Packages/ApelinAgent/Sources/ApelinAgent/Session/ProviderConfiguration.swift \
+            Packages/ApelinAgent/Sources/ApelinAgent/Session/ProviderRegistration.swift \
+            Packages/ApelinAgent/Sources/ApelinAgentWorker/AgentWorker.swift \
+            Packages/ApelinAgent/Sources/ApelinAgentWorker/ChannelHostBackend+Conversations.swift \
+            Packages/ApelinAgent/Sources/ApelinAgentWorker/SessionModelChoice.swift \
+            Packages/ApelinAgent/Sources/ApelinAgentWorker/SignIn/AccountDesk.swift \
+            Packages/ApelinAgent/Sources/ApelinAgentWorker/SignIn/SignInProviders.swift \
+            Packages/ApelinAgent/Tests/ApelinAgentTests/RelayCredentialPoolTests.swift \
+            Packages/ApelinAgent/Tests/ApelinAgentWorkerTests/RelayAccountDeskTests.swift \
+            Packages/ApelinKit/Sources/ApelinProtocol/Operations/Agent.swift \
+            Packages/ApelinKit/Sources/ApelinProtocol/Operations/AgentRelay.swift \
+            Packages/ApelinKit/Sources/ApelinProtocol/Operations/AgentSignIn.swift 2>&1 | tee "$GITHUB_WORKSPACE/format.log"
       - name: Check project invariants
         shell: bash
         run: |
