@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo '7338dde1dae81b10400cb584d8967a79dd23e02ca258110e65f7e45ebdbbb1d7  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
+          echo 'e5bc871ee33527f7a6a0bacee8585f9ac95f99ce0612dd495bf81e04360376d9  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
           mkdir source
           tar -xzf Apelin-fixed-source.tar.gz -C source
           python3 - <<'PY'
@@ -121,6 +121,13 @@ jobs:
           set -euo pipefail
           cd source/Apelin-fixed
           make check 2>&1 | tee "$GITHUB_WORKSPACE/check.log"
+      - name: Run relay continuity tests
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source/Apelin-fixed
+          swift test --no-parallel --package-path Packages/ApelinAgent --filter 'RelayCredentialPoolTests|RelayAccountDeskTests' 2>&1 | tee "$GITHUB_WORKSPACE/relay-tests.log"
       - name: Run Swift regression harness
         timeout-minutes: 45
         shell: bash
