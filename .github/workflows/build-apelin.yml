@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo '90db52cc265ffa5f877717aed1c9604237ce0edcb20c97cc1b478ab273d4fe87  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
+          echo 'bb9cdab90473787e59bf5d0f0f80d4187aef4e52795bd9a4fcf2f8bffae939ee  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
           mkdir source
           tar -xzf Apelin-fixed-source.tar.gz -C source
           python3 - <<'PY'
@@ -82,7 +82,25 @@ jobs:
           key: swift-xcode26.5-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: swift-xcode26.5-
       - name: Install packaging tools
-        run: brew install dpkg ldid zstd
+        run: brew install dpkg ldid zstd swiftformat
+      - name: Format changed Swift sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source/Apelin-fixed
+          swiftformat Apelin/Interface/Chats/ChatController.swift \
+            Apelin/Interface/Chats/ChatGlassView.swift \
+            Apelin/Interface/Chats/ChatModelHeader.swift \
+            Apelin/Interface/Chats/ChatModelPickerController.swift \
+            Apelin/Interface/Chats/ChatTopBlurView.swift \
+            Apelin/Interface/Chats/Composer/ComposerView.swift \
+            Apelin/Interface/Chats/Composer/Sections/ComposerModelBar.swift \
+            Apelin/Interface/Chats/Messages/ChatMessage.swift \
+            Apelin/Interface/Chats/Messages/ChatActivityRow.swift \
+            Apelin/Interface/Chats/Messages/ThinkingStatusLabel.swift \
+            Apelin/Interface/Chats/Messages/ChatMessageRow.swift \
+            Apelin/Interface/Chats/Messages/ToolCallBanner.swift \
+            Tests/ChatTranscript/main.swift 2>&1 | tee "$GITHUB_WORKSPACE/format.log"
       - name: Check project invariants
         shell: bash
         run: |
@@ -104,6 +122,18 @@ jobs:
           make deb-all IOS_SDK_TIER="$BUILD_SDK_TIER" CONFIGURATION=Release SKIP_HARNESS=1 BUILD_NUMBER="$GITHUB_RUN_NUMBER" 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
           cd build/Packages
           shasum -a 256 ./*.deb > SHA256SUMS-deb
+      - name: Preserve matching debug symbols and formatted source
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE/source/Apelin-fixed"
+          version="$(make -C "$root" --no-print-directory print-version)"
+          cd /private/tmp/apelin-deriveddata/Build/Products/Release-iphoneos
+          zip -qry "$root/build/Packages/Apelin_${version}_dSYMs.zip" ./*.dSYM
+          cd "$GITHUB_WORKSPACE/source"
+          tar --exclude='.build' --exclude='build' -czf "$root/build/Packages/Apelin_${version}_Source.tar.gz" Apelin-fixed
+          cd "$root/build/Packages"
+          shasum -a 256 ./*_dSYMs.zip ./*_Source.tar.gz > SHA256SUMS-support
       - name: Save Swift package build cache
         if: always()
         uses: actions/cache/save@v4
@@ -128,5 +158,8 @@ jobs:
           path: |
             source/Apelin-fixed/build/Packages/*.deb
             source/Apelin-fixed/build/Packages/SHA256SUMS-deb
+            source/Apelin-fixed/build/Packages/*_dSYMs.zip
+            source/Apelin-fixed/build/Packages/*_Source.tar.gz
+            source/Apelin-fixed/build/Packages/SHA256SUMS-support
           if-no-files-found: error
           retention-days: 30
