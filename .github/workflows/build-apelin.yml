@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo 'bb9cdab90473787e59bf5d0f0f80d4187aef4e52795bd9a4fcf2f8bffae939ee  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
+          echo '1da0631866c4fd955281ff239a2cce94119ee41b84a6f0a1294442bdf4e64fbe  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
           mkdir source
           tar -xzf Apelin-fixed-source.tar.gz -C source
           python3 - <<'PY'
@@ -122,6 +122,12 @@ jobs:
           make deb-all IOS_SDK_TIER="$BUILD_SDK_TIER" CONFIGURATION=Release SKIP_HARNESS=1 BUILD_NUMBER="$GITHUB_RUN_NUMBER" 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
           cd build/Packages
           shasum -a 256 ./*.deb > SHA256SUMS-deb
+      - name: Audit Objective-C selectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd source/Apelin-fixed
+          Scripts/audit-objc-selectors.sh /private/tmp/apelin-deriveddata/Build/Products/Release-iphoneos 2>&1 | tee "$GITHUB_WORKSPACE/selectors.log"
       - name: Preserve matching debug symbols and formatted source
         shell: bash
         run: |
