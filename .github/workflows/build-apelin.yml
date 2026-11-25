@@ -27,7 +27,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo '9cefdc13cb3b8beabb4346d543cf853fc01d3ad0f854c2e06b83cc9c694fe97f  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
+          echo '6cba9ac8bfcb63a14032603506815aeacb94cd3df53abcc8efbd86fd5361cd79  Apelin-fixed-source.tar.gz' | shasum -a 256 -c -
           mkdir source
           tar -xzf Apelin-fixed-source.tar.gz -C source
           python3 - <<'PY'
@@ -89,35 +89,11 @@ jobs:
           set -euo pipefail
           cd source/Apelin-fixed
           swiftformat Apelin/Interface/Chats/ChatController.swift \
-            Apelin/Interface/Chats/ChatModelPickerController.swift \
-            Apelin/Interface/Chats/ChatRuntime.swift \
-            Apelin/Interface/Chats/Composer/ComposerModelSelection.swift \
-            Apelin/Interface/Settings/Accounts/AgentProvider+Display.swift \
-            Apelin/Interface/Settings/Accounts/EnabledModels.swift \
-            Apelin/Interface/Settings/Accounts/ProviderBalanceHistory.swift \
-            Apelin/Interface/Settings/Accounts/ProviderBalanceScreen.swift \
-            Apelin/Interface/Settings/Accounts/ProviderKeyFormController.swift \
-            Apelin/Interface/Settings/Accounts/ProviderLoginController.swift \
+            Apelin/Interface/Chats/ChatModelHeader.swift \
+            Apelin/Interface/Chats/RelayAccountController.swift \
+            Apelin/Interface/Chats/RelayAccountSummary.swift \
             Apelin/Interface/Settings/Accounts/RelayConfigurationController.swift \
-            Apelind/Session/Agent/AgentConversationRules.swift \
-            Packages/ApelinAgent/Sources/ApelinAgent/Credentials/RelayCredentialPool.swift \
-            Packages/ApelinAgent/Sources/ApelinAgent/Session/AgentSession.swift \
-            Packages/ApelinAgent/Sources/ApelinAgent/Session/NetworkRecovery.swift \
-            Packages/ApelinAgent/Sources/ApelinAgent/Session/ProviderConfiguration.swift \
-            Packages/ApelinAgent/Sources/ApelinAgent/Session/ProviderRegistration.swift \
-            Packages/ApelinAgent/Sources/ApelinAgentWorker/AgentWorker.swift \
-            Packages/ApelinAgent/Sources/ApelinAgentWorker/ChannelHostBackend+Conversations.swift \
-            Packages/ApelinAgent/Sources/ApelinAgentWorker/SessionModelChoice.swift \
-            Packages/ApelinAgent/Sources/ApelinAgentWorker/SignIn/AccountDesk.swift \
-            Packages/ApelinAgent/Sources/ApelinAgentWorker/SignIn/SignInProviders.swift \
-            Packages/ApelinAgent/Tests/ApelinAgentTests/RelayCredentialPoolTests.swift \
-            Packages/ApelinAgent/Tests/ApelinAgentWorkerTests/AccountDeskTests.swift \
-            Packages/ApelinAgent/Tests/ApelinAgentWorkerTests/RelayAccountDeskTests.swift \
-            Packages/ApelinKit/Sources/ApelinProtocol/Operations/Agent.swift \
-            Packages/ApelinKit/Sources/ApelinProtocol/Operations/AgentRelay.swift \
-            Packages/ApelinKit/Sources/ApelinProtocol/Operations/AgentSignIn.swift \
-            Tests/ChatTranscript/RelaySelectionCheck.swift \
-            Tests/ChatTranscript/main.swift 2>&1 | tee "$GITHUB_WORKSPACE/format.log"
+            Tests/ChatTranscript/RelaySelectionCheck.swift 2>&1 | tee "$GITHUB_WORKSPACE/format.log"
       - name: Check project invariants
         shell: bash
         run: |
